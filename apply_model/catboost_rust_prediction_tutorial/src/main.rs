@@ -1,3 +1,4 @@
+// Bring catboost module into the scope
 use catboost;
 
 fn sigmoid(x: f64) -> f64 {
