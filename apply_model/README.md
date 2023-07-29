@@ -14,3 +14,9 @@
 
 * [Apply CatBoost model from Rust](./rust/train_model.ipynb)
     * Explore how to apply CatBoost model from Rust application. If you just want to look at code snippets you can go directly to [main.rs](./rust/src/main.rs)
+
+* [Apply CatBoost model from C](./clang/train_model.ipynb)
+    * Explore how to apply CatBoost model from C application. If you just want to look at code snippets you can go directly to [main.c](./clang/src/main.c)
+
+* [Apply CatBoost model from D](./dlang/train_model.ipynb)
+    * Explore how to apply CatBoost model from D application. If you just want to look at code snippets you can go directly to [main.d](./dlang/src/main.d)
