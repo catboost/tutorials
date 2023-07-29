@@ -1,29 +1,40 @@
-// Bring catboost module into the scope
-use catboost;
+import std.stdio;
+import std.math : exp;
 
-fn sigmoid(x: f64) -> f64 {
-    1. / (1. + (-x).exp())
+// Bring catboost module into the scope
+import lib_import;
+
+double sigmoid(double x)
+{
+    return 1. / (1. + exp(-x));
 }
 
-fn answer(makes_over_50k_a_year: bool) -> &'static str {
-    if makes_over_50k_a_year {
-        "makes over 50K a year"
-    } else {
-        "doesn't make over 50K a year"
+string answer(bool makes_over_50k_a_year)
+{
+    if (makes_over_50k_a_year)
+    {
+        return "makes over 50k a year";
+    }
+    else
+    {
+        return "doesn't make over 50k a year";
     }
 }
 
-fn main() {
+void main(string[] args)
+{
     // Load "adult.cbm" model that we trained withing Jupyter Notebook
-    let model_path = "adult.cbm";
-    let model = catboost::Model::load(model_path).unwrap();
-
+    ModelCalcerHandle* modelHandle = ModelCalcerCreate();
+    if (!(modelHandle.LoadFullModelFromFile("adult.cbm")))
+    {
+        writeln("LoadFullModelFromFile error message: %s", GetErrorString());
+    }
     // You can also try to load your own model just replace "adult.cbm" with path to your model that classifies data
     // from UCI Adult Dataset.
 
-    println!("Adult dataset model metainformation\n");
+    writeln("Adult dataset model metainformation\n");
 
-    println!("tree count: {}", model.get_tree_count());
+    writeln("tree count: ", modelHandle.GetTreeCount());
 
     // In our case we were solving a binary classification problem (weather person makes over 50K a year), so the
     // dimension of the prediction will be 1, it will return probability of the object to belong to the positive
@@ -34,11 +45,11 @@ fn main() {
     //
     // For most of cases prediction dimension will be 1 (for regression and for ranking), it can be N for cases of
     // multiclassification, where N is a number of classes.
-    println!("prediction dimension: {}", model.get_dimensions_count());
+    writeln("prediction dimension: ", modelHandle.GetDimensionsCount());
 
-    println!("numeric feature count: {}", model.get_float_features_count());
+    writeln("numeric feature count: ", modelHandle.GetFloatFeaturesCount());
 
-    println!("categoric feature count: {}", model.get_cat_features_count());
+    writeln("categoric feature count: ", modelHandle.GetCatFeaturesCount());
 
     // Ok now lets try to use our model for prediction. We'll look at the test part of Adult dataset. You will need
     // to download it [1] from UCI repository. Look for "adult.test", "adult.name" will also be useful because it
@@ -62,44 +73,52 @@ fn main() {
     //
     // [1]: https://archive.ics.uci.edu/ml/machine-learning-databases/adult/
 
-    println!();
+    writeln();
 
-    let person_a_numeric_features = vec![25., 226_802., 7., 0., 0., 40.];
-    let person_a_categoric_features = vec![
-        String::from("Private"),
-        String::from("11th"),
-        String::from("Never-married"),
-        String::from("Machine-op-inspct"),
-        String::from("Own-child"),
-        String::from("Black"),
-        String::from("Male"),
-        String::from("United-States"),
+    const(float)[6] pers_a_num_feat = [25., 226_802., 7., 0., 0., 40.];
+    const(char)*[8] pers_a_cat_feat = [
+        "Private".ptr,
+        "11th".ptr,
+        "Never-married".ptr,
+        "Machine-op-inspct".ptr,
+        "Own-child".ptr,
+        "Black".ptr,
+        "Male".ptr,
+        "United-States".ptr
     ];
-    let person_a_prediction = model
-        .calc_model_prediction(
-            vec![person_a_numeric_features.clone()],
-            vec![person_a_categoric_features.clone()],
-        )
-        .unwrap();
+
+    double[1] result_a;
+
+    auto a_num_feat_ptr = pers_a_num_feat.ptr;
+    auto a_cat_feat_ptr = pers_a_cat_feat.ptr;
+
+    if (!modelHandle.CalcModelPrediction(
+            1,
+            &a_num_feat_ptr, 6,
+            &a_cat_feat_ptr, 8,
+            result_a.ptr, 1))
+    {
+        writeln("CalcModelPrediction error message: ", GetErrorString());
+    }
 
     // Since we made prediction only for one person and prediction dimension is 1, proability of person A make
     // over 50K will have index 0 in `person_a_prediction`.
     //
     // CatBoost doesn't compute "probability", to turn CatBoost prediction into a probability we'll need to apply
     // sigmoid function.
-    let person_a_makes_over_50k_probability = sigmoid(person_a_prediction[0]);
-    println!(
-        "Person A make over 50K a year with probability {}",
-        person_a_makes_over_50k_probability
+    double pers_a_makes_over_50k_prob = sigmoid(result_a[0]);
+    writeln(
+        "Person A make over 50K a year with probability ",
+        pers_a_makes_over_50k_prob
     );
 
     // When we were training CatBoost we used a default classification threshold for AUC which is equal to 0.5,
     // this means that our formula is optimized for this threashold, though we may change threshold to optimize some
     // other metric on a different dataset, but we won't do it in this tutorial.
-    let classification_threshold = 0.5;
+    double classification_threshold = 0.5;
 
-    let person_a_makes_over_50k = person_a_makes_over_50k_probability > classification_threshold;
-    println!("Person A {}", answer(person_a_makes_over_50k));
+    bool pers_a_makes_over_50k = pers_a_makes_over_50k_prob > classification_threshold;
+    writeln("Person A ", answer(pers_a_makes_over_50k));
 
     // Now lets find an example with missing features and income greater than 50K a year. At line 40 of "adult.test"
     // we can find following line:
@@ -117,60 +136,82 @@ fn main() {
     // And according to the dataset Person B makes more than 50K a year. Ok, lets try to apply the model to this
     // example.
 
-    println!();
+    writeln();
 
-    let person_b_numeric_features = vec![40., 85019., 16., 0., 0., 45.];
-    let person_b_categoric_features = vec![
-        String::from("Private"),
-        String::from("Doctorate"),
-        String::from("Married-civ-spouce"),
-        String::from("Prof-specialty"),
-        String::from("Husband"),
-        String::from("Asian-Pac-Islander"),
-        String::from("Male"),
-        String::from("nan"),
+    const(float)[6] pers_b_num_feat = [40., 85_019., 16., 0., 0., 45.];
+    const(char)*[8] pers_b_cat_feat = [
+        "Private".ptr,
+        "Doctorate".ptr,
+        "Married-civ-spouce".ptr,
+        "Prof-specialty".ptr,
+        "Husband".ptr,
+        "Asian-Pac-Islander".ptr,
+        "Male".ptr,
+        "nan".ptr
     ];
-    let person_b_prediction = model
-        .calc_model_prediction(
-            vec![person_b_numeric_features.clone()],
-            vec![person_b_categoric_features.clone()],
-        )
-        .unwrap();
-    let person_b_makes_over_50k_probability = sigmoid(person_b_prediction[0]);
-    let person_b_makes_over_50k = person_b_makes_over_50k_probability > classification_threshold;
-    println!(
-        "Person B make over 50K a year with probability {}",
-        person_b_makes_over_50k_probability
+
+    double[1] result_b;
+
+    auto b_num_feat_ptr = pers_b_num_feat.ptr;
+    auto b_cat_feat_ptr = pers_b_cat_feat.ptr;
+
+    if (!modelHandle.CalcModelPrediction(
+            1,
+            &b_num_feat_ptr, 6,
+            &b_cat_feat_ptr, 8,
+            result_b.ptr, 1))
+    {
+        writeln("CalcModelPrediction error message: ", GetErrorString());
+    }
+
+    double pers_b_makes_over_50k_prob = sigmoid(result_b[0]);
+    bool pers_b_makes_over_50k = pers_b_makes_over_50k_prob > classification_threshold;
+    writeln(
+        "Person B make over 50K a year with probability ",
+        pers_b_makes_over_50k_prob
     );
-    println!("Person B {}", answer(person_b_makes_over_50k));
+    writeln("Person B ", answer(pers_b_makes_over_50k));
 
     // Let's try to apply the model to Person A and Person B in one call.
 
-    println!();
+    writeln();
 
-    let persons_ab_numberic_features = vec![person_a_numeric_features, person_b_numeric_features];
-    let persons_ab_categoric_features = vec![person_a_categoric_features, person_b_categoric_features];
-    let persons_ab_predictions = model
-        .calc_model_prediction(persons_ab_numberic_features, persons_ab_categoric_features)
-        .unwrap();
-    let persons_ab_make_over_50k_probabilities =
-        vec![sigmoid(persons_ab_predictions[0]), sigmoid(persons_ab_predictions[1])];
-    let persons_ab_make_over_50k = vec![
-        persons_ab_make_over_50k_probabilities[0] > classification_threshold,
-        persons_ab_make_over_50k_probabilities[1] > classification_threshold,
+    const(float)*[2] pers_ab_num_feat = cast(const(float)*[2])[pers_a_num_feat, pers_b_num_feat];
+    const(char)**[2] pers_ab_cat_feat = cast(const(char)**[2])[pers_a_cat_feat, pers_b_cat_feat];
+
+    double[2] result_ab;
+
+    auto ab_num_feat_ptr = cast(const(float)**)pers_ab_num_feat;
+    auto ab_cat_feat_ptr = cast(const(char)***)pers_ab_cat_feat;
+
+    if (!modelHandle.CalcModelPrediction(
+            2,
+            ab_num_feat_ptr, 6,
+            ab_cat_feat_ptr, 8,
+            result_ab.ptr, 2))
+    {
+        writeln("CalcModelPrediction error message: ", GetErrorString());
+    }
+
+    double[2] pers_ab_makes_over_50k_prob = [sigmoid(result_ab[0]), sigmoid(result_ab[1])];
+    bool[2] pers_ab_makes_over_50k = [
+        pers_ab_makes_over_50k_prob[0] > classification_threshold,
+        pers_ab_makes_over_50k_prob[1] > classification_threshold
     ];
 
-    println!("Using batch interface");
+    writeln("Using batch interface");
 
     // Predictions should be same as above
-    println!(
-        "Person A make over 50K a year with probability {}",
-        persons_ab_make_over_50k_probabilities[0]
+    writeln(
+        "Person A make over 50K a year with probability ",
+        pers_ab_makes_over_50k_prob[0]
     );
-    println!("Person A {}", answer(persons_ab_make_over_50k[0]));
-    println!(
-        "Person B make over 50K a year with probability {}",
-        persons_ab_make_over_50k_probabilities[1]
+    writeln("Person A ", answer(pers_ab_makes_over_50k[0]));
+    writeln(
+        "Person B make over 50K a year with probability ",
+        pers_ab_makes_over_50k_prob[1]
     );
-    println!("Person B {}", answer(persons_ab_make_over_50k[1]));
+    writeln("Person B ", answer(pers_ab_makes_over_50k[1]));
+
+    modelHandle.ModelCalcerDelete();
 }
