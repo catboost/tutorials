@@ -77,17 +77,17 @@ void main(string[] args)
 
     const(float)[6] pers_a_num_feat = [25., 226_802., 7., 0., 0., 40.];
     const(char)*[8] pers_a_cat_feat = [
-        "Private".ptr,
-        "11th".ptr,
-        "Never-married".ptr,
-        "Machine-op-inspct".ptr,
-        "Own-child".ptr,
-        "Black".ptr,
-        "Male".ptr,
-        "United-States".ptr
+        "Private",
+        "11th",
+        "Never-married",
+        "Machine-op-inspct",
+        "Own-child",
+        "Black",
+        "Male",
+        "United-States"
     ];
 
-    double[1] result_a;
+    double[1] result_a = [0];
 
     auto a_num_feat_ptr = pers_a_num_feat.ptr;
     auto a_cat_feat_ptr = pers_a_cat_feat.ptr;
@@ -140,17 +140,17 @@ void main(string[] args)
 
     const(float)[6] pers_b_num_feat = [40., 85_019., 16., 0., 0., 45.];
     const(char)*[8] pers_b_cat_feat = [
-        "Private".ptr,
-        "Doctorate".ptr,
-        "Married-civ-spouce".ptr,
-        "Prof-specialty".ptr,
-        "Husband".ptr,
-        "Asian-Pac-Islander".ptr,
-        "Male".ptr,
-        "nan".ptr
+        "Private",
+        "Doctorate",
+        "Married-civ-spouce",
+        "Prof-specialty",
+        "Husband",
+        "Asian-Pac-Islander",
+        "Male",
+        "nan"
     ];
 
-    double[1] result_b;
+    double[1] result_b = [0];
 
     auto b_num_feat_ptr = pers_b_num_feat.ptr;
     auto b_cat_feat_ptr = pers_b_cat_feat.ptr;
@@ -179,7 +179,7 @@ void main(string[] args)
     const(float)*[2] pers_ab_num_feat = cast(const(float)*[2])[pers_a_num_feat, pers_b_num_feat];
     const(char)**[2] pers_ab_cat_feat = cast(const(char)**[2])[pers_a_cat_feat, pers_b_cat_feat];
 
-    double[2] result_ab;
+    double[2] result_ab = [0, 0];
 
     auto ab_num_feat_ptr = cast(const(float)**)pers_ab_num_feat;
     auto ab_cat_feat_ptr = cast(const(char)***)pers_ab_cat_feat;
