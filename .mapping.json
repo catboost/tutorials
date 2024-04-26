@@ -9,6 +9,7 @@
   "apply_model/java/readme.md":"catboost/tutorials/apply_model/java/readme.md",
   "apply_model/java/src/main/java/CatBoost4jPredictionTutorial.java":"catboost/tutorials/apply_model/java/src/main/java/CatBoost4jPredictionTutorial.java",
   "apply_model/java/src/main/resources/models/adult.cbm":"catboost/tutorials/apply_model/java/src/main/resources/models/adult.cbm",
+  "apply_model/java/target/classes/models/adult.cbm":"catboost/tutorials/apply_model/java/target/classes/models/adult.cbm",
   "apply_model/java/train_model.ipynb":"catboost/tutorials/apply_model/java/train_model.ipynb",
   "apply_model/model_export_as_cpp_code_tutorial.md":"catboost/tutorials/apply_model/model_export_as_cpp_code_tutorial.md",
   "apply_model/model_export_as_python_code_tutorial.md":"catboost/tutorials/apply_model/model_export_as_python_code_tutorial.md",
