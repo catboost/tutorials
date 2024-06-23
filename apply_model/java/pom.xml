@@ -12,7 +12,7 @@
         <dependency>
             <groupId>ai.catboost</groupId>
             <artifactId>catboost-prediction</artifactId>
-            <version>0.2.4</version>
+            <version>1.2.5</version>
         </dependency>
     </dependencies>
 </project>
