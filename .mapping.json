@@ -1,4 +1,5 @@
 {
+  ".":"catboost/tutorials",
   "LICENSE":"catboost/github_toplevel/LICENSE",
   "README.md":"catboost/tutorials/README.md",
   "apply_model/README.md":"catboost/tutorials/apply_model/README.md",
