@@ -4,12 +4,14 @@ import ai.catboost.CatBoostPredictions;
 
 import java.io.IOException;
 
+import static java.util.Objects.requireNonNull;
+
 public class CatBoost4jPredictionTutorial {
     private CatBoostModel adultModel = null;
 
     public CatBoost4jPredictionTutorial() throws CatBoostError, IOException {
         // Load "adult.cbm" model that we trained withing Jupyter Notebook
-        adultModel = CatBoostModel.loadModel(ClassLoader.getSystemResourceAsStream("models/adult.cbm"));
+        adultModel = CatBoostModel.loadModel(requireNonNull(ClassLoader.getSystemResourceAsStream("models/adult.cbm")));
 
         // You can also try to load your own model just comment out the line above and uncomment two lines below while
         // replacing "foo/bar" with path to your model that classifies data from UCI Adult Dataset.
@@ -35,7 +37,7 @@ public class CatBoost4jPredictionTutorial {
 
         System.out.print("Adult dataset model metainformation\n");
 
-        System.out.print(String.format("tree count: %d\n", adultModel.getTreeCount()));
+        System.out.printf("tree count: %d\n", adultModel.getTreeCount());
 
         // In our case we were solving a binary classification problem (weather person makes over 50K a year), so the
         // dimension of the prediction will be 1, it will return probability of the object to belong to the positive
@@ -46,16 +48,16 @@ public class CatBoost4jPredictionTutorial {
         //
         // For most of cases prediction dimension will be 1 (for regression and for ranking), it can be N for cases of
         // multiclassification, where N is a number of classes.
-        System.out.print(String.format("prediction dimension: %d\n",adultModel.getPredictionDimension()));
+        System.out.printf("prediction dimension: %d\n",adultModel.getPredictionDimension());
 
         // Take a note, number of numeric features used by the model may be less than number of numeric features
         // that were present in a training dataset. This may happen if, for example, when traing dataset contained
         // constant features, they do not carry any information for classifier, so training process will ignore them.
-        System.out.print(String.format("used numeric feature count: %d\n", adultModel.getUsedNumericFeatureCount()));
+        System.out.printf("used numeric feature count: %d\n", adultModel.getUsedNumericFeatureCount());
 
         // Number of categoric features used by the classifier may also be less than number of categoric feature present
         // in training dataset, for the same reasons as for numeric features.
-        System.out.print(String.format("used categoric feature count: %d\n", adultModel.getUsedCategoricFeatureCount()));
+        System.out.printf("used categoric feature count: %d\n", adultModel.getUsedCategoricFeatureCount());
 
         // Ok now lets try to use our model for prediction. We'll look at the test part of Adult dataset. You will need
         // to download it [1] from UCI repository. Look for "adult.test", "adult.name" will also be useful because it
@@ -91,7 +93,7 @@ public class CatBoost4jPredictionTutorial {
         // CatBoost doesn't compute "probability", to turn CatBoost prediction into a probability we'll need to apply
         // sigmoid function.
         final double personAMakesOver50KProbability = sigmoid(personAPrediction.get(0, 0));
-        System.out.print(String.format("Person A make over 50K a year with probability %f\n", personAMakesOver50KProbability));
+        System.out.printf("Person A make over 50K a year with probability %f\n", personAMakesOver50KProbability);
 
         // When we were training CatBoost we used a default classification threshold for AUC which is equal to 0.5,
         // this means that our formula is optimized for this threashold, though we may change threshold to optimize some
@@ -99,7 +101,7 @@ public class CatBoost4jPredictionTutorial {
         final double classificationThreshold = 0.5;
 
         final boolean personAMakesOver50K = personAMakesOver50KProbability > classificationThreshold;
-        System.out.print(String.format("Person A %s\n", answer(personAMakesOver50K)));
+        System.out.printf("Person A %s\n", answer(personAMakesOver50K));
 
         // Now lets find an example with missing features and income greater than 50K a year. At line 40 of "adult.test"
         // we can find following line:
@@ -124,8 +126,8 @@ public class CatBoost4jPredictionTutorial {
         final CatBoostPredictions personBPrediction = adultModel.predict(personBNumericFeatures, personBCategoricFeatures);
         final double personBMakeOver50KProbability = sigmoid(personBPrediction.get(0, 0));
         final boolean personBMakesOver50K = personBMakeOver50KProbability > classificationThreshold;
-        System.out.print(String.format("Person B make over 50K a year with probability %f\n", personBMakeOver50KProbability));
-        System.out.print(String.format("Person B %s\n", answer(personBMakesOver50K)));
+        System.out.printf("Person B make over 50K a year with probability %f\n", personBMakeOver50KProbability);
+        System.out.printf("Person B %s\n", answer(personBMakesOver50K));
 
         // There is also a batch interface for model application, e.g. you can apply model to multiple objects at once.
         //
@@ -151,10 +153,10 @@ public class CatBoost4jPredictionTutorial {
         System.out.print("Using batch interface\n");
 
         // Predictions should be same as above
-        System.out.print(String.format("Person A make over 50K a year with probability %f\n", personsABMakeOver50KProbabilities[0]));
-        System.out.print(String.format("Person A %s\n", answer(personsABMakeOver50K[0])));
-        System.out.print(String.format("Person B make over 50K a year with probability %f\n", personsABMakeOver50KProbabilities[1]));
-        System.out.print(String.format("Person B %s\n", answer(personsABMakeOver50K[1])));
+        System.out.printf("Person A make over 50K a year with probability %f\n", personsABMakeOver50KProbabilities[0]);
+        System.out.printf("Person A %s\n", answer(personsABMakeOver50K[0]));
+        System.out.printf("Person B make over 50K a year with probability %f\n", personsABMakeOver50KProbabilities[1]);
+        System.out.printf("Person B %s\n", answer(personsABMakeOver50K[1]));
 
         // TODO: add examples with hashed categorical features
     }
